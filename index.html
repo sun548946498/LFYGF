@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>廊坊壹工坊</title>
+    <style>
+        /* ===== 基础重置与变量 ===== */
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --accessories-gradient: linear-gradient(135deg, #ff6384 0%, #ff9f40 100%);
+            --ninebot-gradient: linear-gradient(135deg, #36a2eb 0%, #9966ff 100%);
+            --xiaomi-gradient: linear-gradient(135deg, #4bc0c0 0%, #ffcd56 100%);
+            --background-gradient: linear-gradient(135deg, #f5f7fa 0%, #e8ecf0 100%);
+            --glass-bg: rgba(255, 255, 255, 0.9);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --shadow-light: 0 4px 20px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.1);
+            --shadow-hover: 0 20px 40px rgba(0,0,0,0.12), 0 8px 16px rgba(0,0,0,0.08);
+            --text-primary: #2d3748;
+            --text-secondary: #718096;
+            --text-muted: #4a5568;
+            --border-color: rgba(226, 232, 240, 0.6);
+            --transition-smooth: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            --transition-bounce: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+        }
+
+        body {
+            background: var(--background-gradient);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 70px 20px 20px 20px;
+        }
+
+        /* ===== Logo组件 ===== */
+        .logo-container {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            z-index: 100;
+        }
+
+        .logo, .secondary-logo, .third-logo {
+            height: auto;
+            filter: drop-shadow(0 4px 12px rgba(0,0,0,0.1));
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            animation: fadeIn 1s ease-out;
+        }
+
+        .secondary-logo {
+            max-width: 80px;
+        }
+
+        .third-logo {
+            max-width: 120px;
+        }
+
+        .logo {
+            max-width: 100px;
+        }
+
+        .logo.hidden, .secondary-logo.hidden, .third-logo.hidden {
+            opacity: 0;
+            transform: translateY(-20px);
+            pointer-events: none;
+        }
+
+        /* ===== 主容器 ===== */
+        .main-content {
+            width: 100%;
+            max-width: 650px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        /* ===== 主板块样式 ===== */
+        .section {
+            width: 100%;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            overflow: hidden;
+            transition: var(--transition-smooth);
+            box-shadow: var(--shadow-light), inset 0 1px 0 rgba(255,255,255,0.6);
+            cursor: pointer;
+            transform: translateZ(0);
+            user-select: none;
+            position: relative;
+            animation: slideInUp 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+            opacity: 0;
+        }
+
+        .section:nth-child(1) { animation-delay: 0.1s; }
+        .section:nth-child(2) { animation-delay: 0.2s; }
+        .section:nth-child(3) { animation-delay: 0.3s; }
+
+        .section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .section:hover {
+            transform: translateY(-6px) scale(1.02);
+            box-shadow: var(--shadow-hover), inset 0 1px 0 rgba(255,255,255,0.8);
+        }
+
+        .section:hover::before {
+            opacity: 1;
+        }
+
+        /* ===== 板块头部 ===== */
+        .section-header {
+            padding: 24px 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+            transition: var(--transition-smooth);
+            background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+        }
+
+        .section-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .section-icon {
+            font-size: 32px;
+            transition: var(--transition-bounce);
+            transform: scale(1) rotate(0deg);
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+        }
+
+        .section-icon img {
+            transition: var(--transition-bounce);
+            transform: scale(1) rotate(0deg);
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+        }
+
+        /* 图标状态管理 */
+        .section:not(.expanded):not(.no-hover):hover .section-icon,
+        .section:not(.expanded):not(.no-hover):hover .section-icon img {
+            transform: scale(1.1) rotate(-5deg);
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));
+        }
+
+        .section.expanded .section-icon,
+        .section.expanded .section-icon img {
+            transform: scale(1.1) rotate(-5deg) !important;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15)) !important;
+        }
+
+        .section.no-hover:not(.expanded) .section-icon,
+        .section.no-hover:not(.expanded) .section-icon img {
+            transform: scale(1) rotate(0deg) !important;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1)) !important;
+        }
+
+        .section-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+            letter-spacing: -0.5px;
+        }
+
+        .expand-icon {
+            font-size: 18px;
+            color: var(--text-secondary);
+            transition: var(--transition-bounce);
+            transform: rotate(0deg);
+        }
+
+        .section.expanded .expand-icon {
+            transform: rotate(180deg);
+            color: #4299e1;
+        }
+
+        /* ===== 展开内容区域 ===== */
+        .section-content {
+            height: 0;
+            overflow: hidden;
+            background: linear-gradient(135deg, rgba(248, 250, 252, 0.9) 0%, rgba(237, 242, 247, 0.9) 100%);
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: var(--transition-smooth);
+        }
+
+        .section.expanded .section-content {
+            height: auto;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .section-inner {
+            padding: 20px 24px;
+            border-top: 1px solid rgba(226, 232, 240, 0.5);
+        }
+
+        .section-description {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+            line-height: 1.6;
+            font-weight: 400;
+        }
+
+        /* ===== 滚动容器 ===== */
+        .scroll-container {
+            margin: 16px 0;
+            position: relative;
+        }
+
+        .scroll-wrapper {
+            display: flex;
+            overflow-x: auto;
+            scroll-behavior: smooth;
+            gap: 16px;
+            padding: 8px 0 16px 0;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .scroll-wrapper::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* ===== 产品卡片 ===== */
+        .scroll-item {
+            flex-shrink: 0;
+            width: 140px;
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            border-radius: 16px;
+            overflow: hidden;
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .item-image {
+            width: 100%;
+            height: 70px;
+            background: var(--primary-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .item-content {
+            padding: 12px;
+            background: white;
+        }
+
+        .item-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+            letter-spacing: -0.2px;
+        }
+
+        .item-price {
+            font-size: 15px;
+            font-weight: 800;
+            color: #e53e3e;
+            margin-bottom: 6px;
+            text-shadow: 0 1px 2px rgba(229, 62, 62, 0.1);
+        }
+
+        .item-description {
+            font-size: 10px;
+            color: var(--text-secondary);
+            line-height: 1.3;
+            font-weight: 400;
+        }
+
+        .scroll-item.selected {
+            border-color: rgba(102, 126, 234, 0.3);
+        }
+
+        /* ===== 功能标签 ===== */
+        .section-features {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin: 16px 0;
+        }
+
+        .feature-item {
+            background: linear-gradient(135deg, #ffffff 0%, #f7fafc 100%);
+            padding: 10px 14px;
+            border-radius: 12px;
+            font-size: 12px;
+            color: var(--text-muted);
+            text-align: center;
+            border: 1px solid var(--border-color);
+            font-weight: 600;
+            transition: var(--transition-smooth);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            transition: left 0.4s ease;
+        }
+
+        .feature-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            border-color: rgba(102, 126, 234, 0.3);
+        }
+
+        .feature-item:hover::before {
+            left: 100%;
+        }
+
+        /* ===== 滑动按钮 ===== */
+        .scroll-nav {
+            position: relative;
+        }
+
+        .scroll-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.95) 100%);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 16px;
+            color: var(--text-muted);
+            z-index: 10;
+            transition: var(--transition-bounce);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1), 0 3px 10px rgba(0,0,0,0.05);
+        }
+
+        .scroll-btn:hover {
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            transform: translateY(-50%) scale(1.1);
+            box-shadow: 0 12px 35px rgba(0,0,0,0.15), 0 5px 15px rgba(0,0,0,0.08);
+            color: var(--text-primary);
+        }
+
+        .scroll-btn:active {
+            transform: translateY(-50%) scale(1.05);
+        }
+
+        .scroll-btn.prev { left: -18px; }
+        .scroll-btn.next { right: -18px; }
+
+        /* ===== 主按钮 ===== */
+        .section-button {
+            width: 100%;
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+            padding: 14px 20px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition-bounce);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3), 0 3px 10px rgba(102, 126, 234, 0.2);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .section-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .section-button:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4), 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .section-button:hover::before {
+            left: 100%;
+        }
+
+        .section-button:active {
+            transform: translateY(-1px) scale(1.01);
+        }
+
+        /* ===== 主题颜色变体 ===== */
+        .accessories .item-image { background: var(--accessories-gradient); }
+        .accessories .section-button {
+            background: var(--accessories-gradient);
+            box-shadow: 0 8px 25px rgba(255, 99, 132, 0.3), 0 3px 10px rgba(255, 99, 132, 0.2);
+        }
+        .accessories .section-button:hover {
+            box-shadow: 0 15px 35px rgba(255, 99, 132, 0.4), 0 8px 20px rgba(255, 99, 132, 0.3);
+        }
+
+        .ninebot .item-image { background: var(--ninebot-gradient); }
+        .ninebot .section-button {
+            background: var(--ninebot-gradient);
+            box-shadow: 0 8px 25px rgba(54, 162, 235, 0.3), 0 3px 10px rgba(54, 162, 235, 0.2);
+        }
+        .ninebot .section-button:hover {
+            box-shadow: 0 15px 35px rgba(54, 162, 235, 0.4), 0 8px 20px rgba(54, 162, 235, 0.3);
+        }
+
+        .xiaomi .item-image { background: var(--xiaomi-gradient); }
+        .xiaomi .section-button {
+            background: var(--xiaomi-gradient);
+            box-shadow: 0 8px 25px rgba(75, 192, 192, 0.3), 0 3px 10px rgba(75, 192, 192, 0.2);
+        }
+        .xiaomi .section-button:hover {
+            box-shadow: 0 15px 35px rgba(75, 192, 192, 0.4), 0 8px 20px rgba(75, 192, 192, 0.3);
+        }
+
+        /* ===== 动画定义 ===== */
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px) scale(0.95);
+                filter: blur(5px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+                filter: blur(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* ===== 响应式设计 ===== */
+        @media (max-width: 768px) {
+            body { padding: 60px 20px 20px 20px; }
+            .main-content { max-width: 100%; gap: 12px; }
+            .logo { max-width: 85px; }
+            .secondary-logo { max-width: 65px; }
+            .third-logo { max-width: 95px; }
+            .section-header { padding: 20px 22px; }
+            .section-icon { font-size: 28px; }
+            .section-icon img { width: 24px !important; height: 24px !important; }
+            .section-title { font-size: 20px; }
+            .section-features { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+            .scroll-item { width: 130px; }
+            .scroll-btn { width: 32px; height: 32px; font-size: 14px; }
+            .scroll-btn.prev { left: -16px; }
+            .scroll-btn.next { right: -16px; }
+        }
+
+        @media (max-width: 480px) {
+            body { padding: 50px 15px 15px 15px; }
+            .main-content { gap: 10px; }
+            .logo { max-width: 75px; }
+            .secondary-logo { max-width: 55px; }
+            .third-logo { max-width: 85px; }
+            .logo-container { gap: 8px; }
+            .section { border-radius: 16px; }
+            .section-header { padding: 18px 20px; }
+            .section-left { gap: 12px; }
+            .section-icon { font-size: 26px; }
+            .section-icon img { width: 22px !important; height: 22px !important; }
+            .section-title { font-size: 18px; }
+            .section-inner { padding: 16px 20px; }
+            .section-description { font-size: 13px; margin-bottom: 12px; }
+            .section-features { grid-template-columns: 1fr; gap: 6px; }
+            .feature-item { padding: 8px 12px; font-size: 11px; }
+            .scroll-item { width: 120px; }
+            .item-image { height: 60px; font-size: 22px; }
+            .item-content { padding: 10px; }
+            .item-title { font-size: 12px; }
+            .item-price { font-size: 14px; }
+            .item-description { font-size: 9px; }
+            .section-button { padding: 12px 18px; font-size: 13px; }
+            .scroll-btn { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="logo-container">
+        <img src="https://i.postimg.cc/1Xx5bwdG/IMG-0930.png" alt="Secondary Logo" class="secondary-logo">
+        <img src="https://i.postimg.cc/hPdJkZLx/IMG-0919.png" alt="Logo" class="logo">
+        <img src="https://i.postimg.cc/tCp2HfWc/IMG-0932.png" alt="Third Logo" class="third-logo">
+    </div>
+
+    <div class="main-content">
+        <!-- 配件展示板块 -->
+        <div class="section accessories">
+            <div class="section-header">
+                <div class="section-left">
+                    <span class="section-icon">🔧</span>
+                    <h2 class="section-title">配件展示</h2>
+                </div>
+                <span class="expand-icon">▼</span>
+            </div>
+            <div class="section-content">
+                <div class="section-inner">
+                    <p class="section-description">
+                        精选优质配件，提升您的出行体验。原装及兼容配件，品质保证。
+                    </p>
+                    
+                    <div class="scroll-container">
+                        <div class="scroll-nav">
+                            <div class="scroll-btn prev" onclick="scrollItems(this, 'left')">‹</div>
+                            <div class="scroll-btn next" onclick="scrollItems(this, 'right')">›</div>
+                            <div class="scroll-wrapper" id="accessories-scroll">
+                                <div class="scroll-item">
+                                    <div class="item-image">⛑️</div>
+                                    <div class="item-content">
+                                        <div class="item-title">安全头盔</div>
+                                        <div class="item-price">¥168-298</div>
+                                        <div class="item-description">多种颜色，CE认证</div>
+                                    </div>
+                                </div>
+                                <div class="scroll-item">
+                                    <div class="item-image">🔌</div>
+                                    <div class="item-content">
+                                        <div class="item-title">快速充电器</div>
+                                        <div class="item-price">¥128-188</div>
+                                        <div class="item-description">原装品质，快充技术</div>
+                                    </div>
+                                </div>
+                                <div class="scroll-item">
+                                    <div class="item-image">🛞</div>
+                                    <div class="item-content">
+                                        <div class="item-title">轮胎套装</div>
+                                        <div class="item-price">¥88-158</div>
+                                        <div class="item-description">耐磨防滑，多种规格</div>
+                                    </div>
+                                </div>
+                                <div class="scroll-item">
+                                    <div class="item-image">🦺</div>
+                                    <div class="item-content">
+                                        <div class="item-title">护具套装</div>
+                                        <div class="item-price">¥98-168</div>
+                                        <div class="item-description">护膝护肘，全方位保护</div>
+                                    </div>
+                                </div>
+                                <div class="scroll-item">
+                                    <div class="item-image">🔧</div>
+                                    <div class="item-content">
+                                        <div class="item-title">维修工具</div>
+                                        <div class="item-price">¥58-128</div>
+                                        <div class="item-description">专业工具包</div>
+                                    </div>
+                                </div>
+                                <div class="scroll-item">
+                                    <div class="item-image">📱</div>
+                                    <div class="item-content">
+                                        <div class="item-title">手机支架</div>
+                                        <div class="item-price">¥38-78</div>
+                                        <div class="item-description">稳固耐用</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="section-features">
+                        <div class="feature-item">原装头盔</div>
+                        <div class="feature-item">防护护具</div>
+                        <div class="feature-item">快充充电器</div>
+                        <div class="feature-item">高品质轮胎</div>
+                        <div class="feature-item">车载配件</div>
+                        <div class="feature-item">维修工具</div>
+                    </div>
+                    <button class="section-button" onclick="event.stopPropagation(); goToAccessories()">浏览所有配件</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 二手小牛板块 -->
+        <div class="section ninebot">
+            <div class="section-header">
+                <div class="section-left">
+                    <img src="https://i.postimg.cc/767ZKFdm/IMG-0923.png" alt="小牛Logo" class="section-icon" style="width: 28px; height: 28px; object-fit: contain;">
+                    <h2 class="section-title">精品二手小牛</h2>
+                </div>
+                <span class="expand-icon">▼</span>
+            </div>
+            <div class="section-content">
+                <div class="section-inner">
+                    <p class="section-description">
+                        精选二手小牛电动车，专业检测，车况透明，提供质保。
+                    </p>
+                    
+                    <div class="scroll-container">
+                        <div class="scroll-nav">
+                            <div class="scroll-btn prev" onclick="scrollItems(this, 'left')">‹</div>
+                            <div class="scroll-btn next" onclick="scrollItems(this, 'right')">›</div>
+                            <div class="scroll-wrapper" id="ninebot-scroll">
+                                <div class="scroll-item">
+                                    <div class="item-image">🛴</div>
+                                    <div class="item-content">
+                                        <div class="item-title">小牛N1S</div>
+                                        <div class="item-price">¥2,899</div>
+                                        <div class="item-description">续航70km，九成新</div>
+                                    </div>
+                                </div>
+                                <div class="scroll-item">
+                                    <div class="item-image">🛵</div>
+                                    <div class="item-content">
+                                        <div class="item-title">小牛M+</div>
+                                        <div class="item-price">¥3,499</div>
+                                        <div class="item-description">运动版，续航80km</div>
+                                    </div>
+                                </div>
+                                <div class="scroll-item">
+                                    <div class="item-image">🛺</div>
+                                    <div class="item-content">
+                                        <div class="item-title">小牛U+</div>
+                                        <div class="item-price">¥4,299</div>
+                                        <div class="item-description">城市版，GPS定位</div>
+                                    </div>
+                                </div>
+                                <div class="scroll-item">
+                                    <div class="item-image">🏍️</div>
+                                    <div class="item-content">
+                                        <div class="item-title">小牛NGT</div>
+                                        <div class="item-price">¥5,999</div>
+                                        <div class="item-description">旗舰版，续航130km</div>
+                                    </div>
+                                </div>
+                                <div class="scroll-item">
+                                    <div class="item-image">🛴</div>
+                                    <div class="item-content">
+                                        <div class="item-title">小牛G0</div>
+                                        <div class="item-price">¥1,899</div>
+                                        <div class="item-description">入门款，续航55km</div>
+                                    </div>
+                                </div>
+                                <div class="scroll-item">
+                                    <div class="item-image">🛵</div>
+                                    <div class="item-content">
+                                        <div class="item-title">小牛UQi+</div>
+                                        <div class="item-price">¥3,899</div>
+                                        <div class="item-description">轻便款，可提锂电</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="section-features">
+                        <div class="feature-item">专业检测</div>
+                        <div class="feature-item">质量保证</div>
+                        <div class="feature-item">价格优惠</div>
+                        <div class="feature-item">支持试驾</div>
+                        <div class="feature-item">售后服务</div>
+                        <div class="feature-item">分期付款</div>
+                    </div>
+                    <button class="section-button" onclick="event.stopPropagation(); goToNiu()">查看小牛车型</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 二手九号板块 -->
+        <div class="section xiaomi">
+            <div class="section-header">
+                <div class="section-left">
+                    <img src="https://i.postimg.cc/RV9d7xNt/IMG-0925-1.png" alt="九号Logo" class="section-icon" style="width: 28px; height: 28px; object-fit: contain;">
+                    <h2 class="section-title">精品二手九号</h2>
+                </div>
+                <span class="expand-icon">▼</span>
+            </div>
+            <div class="section-content">
+                <div class="section-inner">
+                    <p class="section-description">
+                        九号电动车二手精品，智能出行，专业维护，品质可靠。
+                    </p>
+                    
+                    <div class="scroll-container">
+                        <div class="scroll-nav">
+                            <div class="scroll-btn prev" onclick="scrollItems(this, 'left')">‹</div>
+                            <div class="scroll-btn next" onclick="scrollItems(this, 'right')">›</div>
+                            <div class="scroll-wrapper" id="xiaomi-scroll">
+                                <div class="scroll-item">
+                                    <div class="item-image">🛴</div>
+                                    <div class="item-content">
+                                        <div class="item-title">九号E22</div>
+                                        <div class="item-price">¥1,599</div>
+                                        <div class="item-description">入门智能，续航22km</div>
+                                    </div>
+                                </div>
+                                <div class="scroll-item">
+                                    <div class="item-image">🛵</div>
+                                    <div class="item-content">
+                                        <div class="item-title">九号F40</div>
+                                        <div class="item-price">¥2,799</div>
+                                        <div class="item-description">长续航，40km里程</div>
+                                    </div>
+                                </div>
+                                <div class="scroll-item">
+                                    <div class="item-image">🏍️</div>
+                                    <div class="item-content">
+                                        <div class="item-title">九号C60</div>
+                                        <div class="item-price">¥4,199</div>
+                                        <div class="item-description">商务款，续航60km</div>
+                                    </div>
+                                </div>
+                                <div class="scroll-item">
+                                    <div class="item-image">🛺</div>
+                                    <div class="item-content">
+                                        <div class="item-title">九号B90</div>
+                                        <div class="item-price">¥5,299</div>
+                                        <div class="item-description">旗舰版，续航90km</div>
+                                    </div>
+                                </div>
+                                <div class="scroll-item">
+                                    <div class="item-image">🛴</div>
+                                    <div class="item-content">
+                                        <div class="item-title">九号A30</div>
+                                        <div class="item-price">¥2,199</div>
+                                        <div class="item-description">都市版，续航30km</div>
+                                    </div>
+                                </div>
+                                <div class="scroll-item">
+                                    <div class="item-image">🏍️</div>
+                                    <div class="item-content">
+                                        <div class="item-title">九号D80</div>
+                                        <div class="item-price">¥4,899</div>
+                                        <div class="item-description">动力版，续航80km</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="section-features">
+                        <div class="feature-item">智能系统</div>
+                        <div class="feature-item">APP控制</div>
+                        <div class="feature-item">GPS定位</div>
+                        <div class="feature-item">长续航</div>
+                        <div class="feature-item">品质保障</div>
+                        <div class="feature-item">技术支持</div>
+                    </div>
+                    <button class="section-button" onclick="event.stopPropagation(); goToXiaomi()">查看九号车型</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===== 应用状态管理 =====
+        const AppState = {
+            touch: {
+                startY: 0,
+                startX: 0,
+                timeStamp: 0,
+                isSwiping: false
+            },
+            timers: {
+                click: null,
+                item: null
+            }
+        };
+
+        // ===== 工具函数 =====
+        const Utils = {
+            // 重置图标状态并禁用悬停
+            resetIconState(section) {
+                const icon = section.querySelector('.section-icon');
+                const iconImg = section.querySelector('.section-icon img');
+                
+                section.classList.add('no-hover');
+                
+                if (icon) {
+                    icon.style.transform = 'scale(1) rotate(0deg)';
+                    icon.style.filter = 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))';
+                }
+                if (iconImg) {
+                    iconImg.style.transform = 'scale(1) rotate(0deg)';
+                    iconImg.style.filter = 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))';
+                }
+                
+                setTimeout(() => {
+                    if (icon) {
+                        icon.style.transform = '';
+                        icon.style.filter = '';
+                    }
+                    if (iconImg) {
+                        iconImg.style.transform = '';
+                        iconImg.style.filter = '';
+                    }
+                }, 200);
+            },
+
+            // 启用悬停效果
+            enableHoverEffect(section) {
+                section.classList.remove('no-hover');
+            },
+
+            // 显示通知
+            showNotification(message) {
+                const notification = document.createElement('div');
+                notification.style.cssText = `
+                    position: fixed; top: 20px; right: 20px; z-index: 1000;
+                    background: var(--primary-gradient); color: white;
+                    padding: 12px 20px; border-radius: 8px; font-size: 14px; font-weight: 600;
+                    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+                    transform: translateX(100%); transition: transform 0.3s ease;
+                `;
+                notification.textContent = message;
+                document.body.appendChild(notification);
+                
+                requestAnimationFrame(() => {
+                    notification.style.transform = 'translateX(0)';
+                });
+                
+                setTimeout(() => {
+                    notification.style.transform = 'translateX(100%)';
+                    setTimeout(() => document.body.removeChild(notification), 300);
+                }, 3000);
+            }
+        };
+
+        // ===== 核心功能 =====
+        const SectionManager = {
+            // 切换板块展开/折叠
+            toggle(element, event) {
+                if (AppState.touch.isSwiping) {
+                    event && event.preventDefault();
+                    return;
+                }
+                
+                if (event && event.type === 'touchend') {
+                    AppState.touch.isSwiping = false;
+                    return;
+                }
+                
+                const logos = document.querySelectorAll('.logo, .secondary-logo, .third-logo');
+                
+                if (element.classList.contains('expanded')) {
+                    element.classList.remove('expanded');
+                    setTimeout(() => Utils.resetIconState(element), 50);
+                    
+                    const hasExpandedSections = document.querySelector('.section.expanded');
+                    if (!hasExpandedSections) {
+                        logos.forEach(logo => logo.classList.remove('hidden'));
+                    }
+                    return;
+                }
+                
+                // 关闭其他展开的板块
+                document.querySelectorAll('.section').forEach(section => {
+                    if (section !== element && section.classList.contains('expanded')) {
+                        section.classList.remove('expanded');
+                        setTimeout(() => Utils.resetIconState(section), 50);
+                    }
+                });
+                
+                requestAnimationFrame(() => {
+                    if (!AppState.touch.isSwiping) {
+                        element.classList.add('expanded');
+                        Utils.enableHoverEffect(element);
+                        logos.forEach(logo => logo.classList.add('hidden'));
+                        
+                        setTimeout(() => {
+                            element.scrollIntoView({
+                                behavior: 'smooth',
+                                block: 'start'
+                            });
+                        }, 100);
+                    }
+                });
+            },
+
+            // 关闭所有展开的板块
+            closeAll() {
+                const expandedSections = document.querySelectorAll('.section.expanded');
+                const logos = document.querySelectorAll('.logo, .secondary-logo, .third-logo');
+                
+                expandedSections.forEach(section => {
+                    section.classList.remove('expanded');
+                    setTimeout(() => Utils.resetIconState(section), 50);
+                });
+                
+                if (expandedSections.length > 0) {
+                    logos.forEach(logo => logo.classList.remove('hidden'));
+                }
+            }
+        };
+
+        const ScrollManager = {
+            // 滑动商品项
+            scrollItems(button, direction, event) {
+                if (event) event.stopPropagation();
+                
+                const scrollWrapper = button.parentElement.querySelector('.scroll-wrapper');
+                const scrollDistance = 160;
+                
+                scrollWrapper.scrollBy({
+                    left: direction === 'left' ? -scrollDistance : scrollDistance,
+                    behavior: 'smooth'
+                });
+            },
+
+            // 选择商品项
+            selectItem(item, event) {
+                if (event) {
+                    event.stopPropagation();
+                    event.preventDefault();
+                }
+                
+                if (AppState.touch.isSwiping) return;
+                
+                const title = item.querySelector('.item-title').textContent;
+                const price = item.querySelector('.item-price').textContent;
+                console.log(`选中商品: ${title}, 价格: ${price}`);
+                
+                item.parentElement.querySelectorAll('.scroll-item').forEach(i => 
+                    i.classList.remove('selected')
+                );
+                item.classList.add('selected');
+            }
+        };
+
+        const TouchHandler = {
+            // 处理触摸开始
+            handleStart(event) {
+                AppState.touch.startY = event.touches[0].clientY;
+                AppState.touch.startX = event.touches[0].clientX;
+                AppState.touch.timeStamp = event.timeStamp;
+                AppState.touch.isSwiping = false;
+            },
+
+            // 处理触摸移动
+            handleMove(event) {
+                if (!AppState.touch.startY || !AppState.touch.startX) return;
+                
+                const touchY = event.touches[0].clientY;
+                const touchX = event.touches[0].clientX;
+                const diffY = Math.abs(touchY - AppState.touch.startY);
+                const diffX = Math.abs(touchX - AppState.touch.startX);
+                
+                if (diffY > 3 || diffX > 3) {
+                    AppState.touch.isSwiping = true;
+                }
+            },
+
+            // 处理触摸结束
+            handleEnd(event) {
+                const timeDiff = event.timeStamp - AppState.touch.timeStamp;
+                AppState.touch.startY = 0;
+                AppState.touch.startX = 0;
+                
+                setTimeout(() => {
+                    AppState.touch.isSwiping = false;
+                }, 100);
+            }
+        };
+
+        // ===== 全局函数（供HTML调用）=====
+        function toggleSection(element, event) {
+            SectionManager.toggle(element, event);
+        }
+
+        function scrollItems(button, direction, event) {
+            ScrollManager.scrollItems(button, direction, event);
+        }
+
+        function selectItem(item, event) {
+            ScrollManager.selectItem(item, event);
+        }
+
+        function goToAccessories() {
+            console.log('跳转到配件展示页面');
+            Utils.showNotification('即将跳转到配件展示页面');
+        }
+
+        function goToNiu() {
+            console.log('跳转到二手小牛页面');
+            Utils.showNotification('即将跳转到二手小牛页面');
+        }
+
+        function goToXiaomi() {
+            console.log('跳转到二手九号页面');
+            Utils.showNotification('即将跳转到二手九号页面');
+        }
+
+        // ===== 应用初始化 =====
+        document.addEventListener('DOMContentLoaded', () => {
+            // 预加载优化
+            document.querySelectorAll('.section-content').forEach(content => {
+                content.offsetHeight;
+            });
+            
+            // 为主板块添加事件监听
+            document.querySelectorAll('.section').forEach(section => {
+                // 触摸事件
+                section.addEventListener('touchstart', TouchHandler.handleStart, { passive: true });
+                section.addEventListener('touchmove', TouchHandler.handleMove, { passive: true });
+                section.addEventListener('touchend', TouchHandler.handleEnd);
+                
+                // 鼠标事件
+                section.addEventListener('mouseleave', () => Utils.enableHoverEffect(section));
+                
+                // 点击事件（防抖处理）
+                section.addEventListener('click', (event) => {
+                    if (AppState.touch.isSwiping) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        return;
+                    }
+                    
+                    if (AppState.timers.click) clearTimeout(AppState.timers.click);
+                    AppState.timers.click = setTimeout(() => {
+                        if (!AppState.touch.isSwiping) {
+                            toggleSection(section, event);
+                        }
+                    }, 50);
+                });
+            });
+            
+            // 为商品项添加事件监听
+            document.querySelectorAll('.scroll-item').forEach(item => {
+                item.addEventListener('touchstart', TouchHandler.handleStart, { passive: true });
+                item.addEventListener('touchmove', TouchHandler.handleMove, { passive: true });
+                item.addEventListener('touchend', TouchHandler.handleEnd);
+                
+                item.addEventListener('click', (event) => {
+                    if (AppState.touch.isSwiping) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        return;
+                    }
+                    
+                    if (AppState.timers.item) clearTimeout(AppState.timers.item);
+                    AppState.timers.item = setTimeout(() => {
+                        if (!AppState.touch.isSwiping) {
+                            selectItem(item, event);
+                        }
+                    }, 50);
+                });
+            });
+            
+            // 滑动按钮事件
+            document.querySelectorAll('.scroll-btn').forEach(btn => {
+                btn.onclick = function(event) {
+                    const direction = this.classList.contains('prev') ? 'left' : 'right';
+                    scrollItems(this, direction, event);
+                };
+            });
+            
+            // 键盘支持
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    SectionManager.closeAll();
+                }
+            });
+
+            // 点击外部关闭
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.section')) {
+                    SectionManager.closeAll();
+                }
+            });
+            
+            // 阻止展开内容区域的点击事件冒泡
+            document.querySelectorAll('.section-content').forEach(content => {
+                content.addEventListener('click', (e) => e.stopPropagation());
+            });
+        });
+    </script>
+</body>
+</html>
